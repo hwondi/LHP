@@ -1,0 +1,65 @@
+--// 🌞 FullBright Universal Script 🌞
+--// Criado para administradores Roblox - Uso livre e universal
+--// Funções: Ativar / Desativar com tecla [F]
+
+--// Configuração inicial
+local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
+local FullBright = {}
+FullBright.Enabled = false
+FullBright.NormalLightingSettings = {}
+
+--// Salva configurações originais de iluminação
+local function SaveLighting()
+	FullBright.NormalLightingSettings = {
+		Brightness = Lighting.Brightness,
+		ClockTime = Lighting.ClockTime,
+		FogEnd = Lighting.FogEnd,
+		GlobalShadows = Lighting.GlobalShadows,
+		Ambient = Lighting.Ambient
+	}
+end
+
+--// Ativa o modo FullBright
+function FullBright.Ativar()
+	if FullBright.Enabled then return end
+	SaveLighting()
+
+	Lighting.Brightness = 2
+	Lighting.ClockTime = 12
+	Lighting.FogEnd = 1e10
+	Lighting.GlobalShadows = false
+	Lighting.Ambient = Color3.new(1, 1, 1)
+
+	FullBright.Enabled = true
+	print("[FullBright] Ativado 🌞")
+end
+
+--// Desativa o modo FullBright e restaura iluminação original
+function FullBright.Desativar()
+	if not FullBright.Enabled then return end
+	local Normal = FullBright.NormalLightingSettings
+
+	Lighting.Brightness = Normal.Brightness
+	Lighting.ClockTime = Normal.ClockTime
+	Lighting.FogEnd = Normal.FogEnd
+	Lighting.GlobalShadows = Normal.GlobalShadows
+	Lighting.Ambient = Normal.Ambient
+
+	FullBright.Enabled = false
+	print("[FullBright] Desativado 🌚")
+end
+
+--// Alternar com tecla F
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.F then
+		if FullBright.Enabled then
+			FullBright.Desativar()
+		else
+			FullBright.Ativar()
+		end
+	end
+end)
+
+print("[FullBright] Script carregado. Pressione [F] para ativar/desativar.")
