@@ -1,65 +1,106 @@
---// 🌞 FullBright Universal Script 🌞
---// Criado para administradores Roblox - Uso livre e universal
---// Funções: Ativar / Desativar com tecla [F]
-
---// Configuração inicial
 local Lighting = game:GetService("Lighting")
-local UserInputService = game:GetService("UserInputService")
-local FullBright = {}
-FullBright.Enabled = false
-FullBright.NormalLightingSettings = {}
+local player = game.Players.LocalPlayer
 
---// Salva configurações originais de iluminação
-local function SaveLighting()
-	FullBright.NormalLightingSettings = {
-		Brightness = Lighting.Brightness,
-		ClockTime = Lighting.ClockTime,
-		FogEnd = Lighting.FogEnd,
-		GlobalShadows = Lighting.GlobalShadows,
-		Ambient = Lighting.Ambient
-	}
-end
+local brightnessLevel = 25
+local maxLevel, minLevel = 50, 0
 
---// Ativa o modo FullBright
-function FullBright.Ativar()
-	if FullBright.Enabled then return end
-	SaveLighting()
-
-	Lighting.Brightness = 2
-	Lighting.ClockTime = 12
-	Lighting.FogEnd = 1e10
+local function applyBrightness()
+	Lighting.Brightness = brightnessLevel / 10
+	Lighting.Ambient = Color3.new(brightnessLevel / 50, brightnessLevel / 50, brightnessLevel / 50)
+	Lighting.OutdoorAmbient = Color3.new(brightnessLevel / 50, brightnessLevel / 50, brightnessLevel / 50)
 	Lighting.GlobalShadows = false
-	Lighting.Ambient = Color3.new(1, 1, 1)
-
-	FullBright.Enabled = true
-	print("[FullBright] Ativado 🌞")
 end
 
---// Desativa o modo FullBright e restaura iluminação original
-function FullBright.Desativar()
-	if not FullBright.Enabled then return end
-	local Normal = FullBright.NormalLightingSettings
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "FullBrightUI"
 
-	Lighting.Brightness = Normal.Brightness
-	Lighting.ClockTime = Normal.ClockTime
-	Lighting.FogEnd = Normal.FogEnd
-	Lighting.GlobalShadows = Normal.GlobalShadows
-	Lighting.Ambient = Normal.Ambient
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 260, 0, 120)
+frame.Position = UDim2.new(0.35, 0, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
 
-	FullBright.Enabled = false
-	print("[FullBright] Desativado 🌚")
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -30, 0, 25)
+title.Position = UDim2.new(0, 10, 0, 5)
+title.Text = "FullBright"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundTransparency = 1
+title.TextScaled = true
+
+local closeButton = Instance.new("TextButton", frame)
+closeButton.Size = UDim2.new(0, 25, 0, 25)
+closeButton.Position = UDim2.new(1, -30, 0, 5)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+closeButton.BorderSizePixel = 0
+
+local progressBarBack = Instance.new("Frame", frame)
+progressBarBack.Size = UDim2.new(0.9, 0, 0, 25)
+progressBarBack.Position = UDim2.new(0.05, 0, 0.4, 0)
+progressBarBack.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+progressBarBack.BorderSizePixel = 0
+
+local progressBar = Instance.new("Frame", progressBarBack)
+progressBar.Size = UDim2.new(brightnessLevel / maxLevel, 0, 1, 0)
+progressBar.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+progressBar.BorderSizePixel = 0
+
+local valueLabel = Instance.new("TextLabel", progressBarBack)
+valueLabel.Size = UDim2.new(1, 0, 1, 0)
+valueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+valueLabel.BackgroundTransparency = 1
+valueLabel.TextScaled = true
+valueLabel.Text = tostring(brightnessLevel) .. "/" .. tostring(maxLevel)
+
+local minus = Instance.new("TextButton", frame)
+minus.Size = UDim2.new(0, 50, 0, 30)
+minus.Position = UDim2.new(0.2, 0, 0.75, 0)
+minus.Text = "-"
+minus.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+minus.TextColor3 = Color3.fromRGB(255, 255, 255)
+minus.BorderSizePixel = 0
+minus.TextScaled = true
+
+local plus = Instance.new("TextButton", frame)
+plus.Size = UDim2.new(0, 50, 0, 30)
+plus.Position = UDim2.new(0.65, 0, 0.75, 0)
+plus.Text = "+"
+plus.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+plus.TextColor3 = Color3.fromRGB(255, 255, 255)
+plus.BorderSizePixel = 0
+plus.TextScaled = true
+
+local minimized = false
+
+local function updateUI()
+	progressBar.Size = UDim2.new(brightnessLevel / maxLevel, 0, 1, 0)
+	valueLabel.Text = tostring(brightnessLevel) .. "/" .. tostring(maxLevel)
 end
 
---// Alternar com tecla F
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.F then
-		if FullBright.Enabled then
-			FullBright.Desativar()
-		else
-			FullBright.Ativar()
-		end
-	end
+plus.MouseButton1Click:Connect(function()
+	brightnessLevel = math.clamp(brightnessLevel + 5, minLevel, maxLevel)
+	updateUI()
+	applyBrightness()
 end)
 
-print("[FullBright] Script carregado. Pressione [F] para ativar/desativar.")
+minus.MouseButton1Click:Connect(function()
+	brightnessLevel = math.clamp(brightnessLevel - 5, minLevel, maxLevel)
+	updateUI()
+	applyBrightness()
+end)
+
+closeButton.MouseButton1Click:Connect(function()
+	minimized = not minimized
+	for _, obj in ipairs(frame:GetChildren()) do
+		if obj ~= closeButton and obj ~= title then
+			obj.Visible = not minimized
+		end
+	end
+	frame.Size = minimized and UDim2.new(0, 120, 0, 35) or UDim2.new(0, 260, 0, 120)
+end)
+
+applyBrightness()
